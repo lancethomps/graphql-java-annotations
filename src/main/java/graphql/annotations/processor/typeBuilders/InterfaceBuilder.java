@@ -14,25 +14,25 @@
  */
 package graphql.annotations.processor.typeBuilders;
 
-import graphql.annotations.annotationTypes.GraphQLDescription;
-import graphql.annotations.annotationTypes.GraphQLField;
-import graphql.annotations.annotationTypes.GraphQLTypeResolver;
-import graphql.annotations.processor.ProcessingElementsContainer;
-import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
-import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
-import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
-import graphql.annotations.processor.exceptions.CannotCastMemberException;
-import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLInterfaceType;
+import static graphql.annotations.processor.util.ReflectionKit.newInstance;
+import static graphql.schema.GraphQLInterfaceType.newInterface;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import static graphql.annotations.processor.util.ReflectionKit.newInstance;
-import static graphql.schema.GraphQLInterfaceType.newInterface;
+import graphql.annotations.annotationTypes.GraphQLDescription;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLTypeResolver;
+import graphql.annotations.processor.ProcessingElementsContainer;
+import graphql.annotations.processor.exceptions.CannotCastMemberException;
+import graphql.annotations.processor.exceptions.GraphQLAnnotationsException;
+import graphql.annotations.processor.retrievers.GraphQLExtensionsHandler;
+import graphql.annotations.processor.retrievers.GraphQLFieldRetriever;
+import graphql.annotations.processor.retrievers.GraphQLObjectInfoRetriever;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInterfaceType;
 /**
  * Copyright 2016 Yurii Rashkovskii
  *
@@ -61,7 +61,7 @@ public class InterfaceBuilder {
 
     public GraphQLInterfaceType.Builder getInterfaceBuilder(Class<?> iface, ProcessingElementsContainer container) throws GraphQLAnnotationsException,
             IllegalArgumentException, CannotCastMemberException {
-        if (!iface.isInterface()) {
+        if (!iface.isInterface() && !Modifier.isAbstract(iface.getModifiers())) {
             throw new IllegalArgumentException(iface + " is not an interface");
         }
         GraphQLInterfaceType.Builder builder = newInterface();

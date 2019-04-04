@@ -14,6 +14,15 @@
  */
 package graphql.annotations.processor.typeBuilders;
 
+import static graphql.annotations.processor.util.ObjectUtil.getAllFields;
+import static graphql.schema.GraphQLObjectType.newObject;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLTypeResolver;
 import graphql.annotations.processor.ProcessingElementsContainer;
@@ -27,15 +36,6 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLTypeReference;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-
-import static graphql.annotations.processor.util.ObjectUtil.getAllFields;
-import static graphql.schema.GraphQLObjectType.newObject;
 
 
 public class OutputObjectBuilder {
@@ -104,6 +104,20 @@ public class OutputObjectBuilder {
                 }
                 builder.fields(extensionsHandler.getExtensionFields(iface, definedFields, container));
             }
+        }
+
+        Class<?> iface = object.getSuperclass();
+        while (iface != null) {
+            if (iface.getAnnotation(GraphQLTypeResolver.class) != null) {
+                String ifaceName = graphQLObjectInfoRetriever.getTypeName(iface);
+                if (container.getProcessing().contains(ifaceName)) {
+                    builder.withInterface(new GraphQLTypeReference(ifaceName));
+                } else {
+                    builder.withInterface((GraphQLInterfaceType) graphQLInterfaceRetriever.getInterface(iface, container));
+                }
+                builder.fields(extensionsHandler.getExtensionFields(iface, definedFields, container));
+            }
+            iface = iface.getSuperclass();
         }
 
         builder.fields(extensionsHandler.getExtensionFields(object, definedFields, container));
